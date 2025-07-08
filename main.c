@@ -1,143 +1,195 @@
 #include <stdio.h>
-#include<stdlib.h>
-#include<string.h>
-struct node
-{
+#include <stdlib.h>
+#include <string.h>
+
+struct node {
     int roll;
     int prn;
     char name[20];
     struct node *next;
-    
 };
-struct node* create()
-{
-  struct node * head;
-  int p,r;
-  char na[20];
-  head=(struct node *)malloc(sizeof(struct node ));
-  printf("ENTER YOU PRN NO, ROLL NO & NAME:\n");
-  scanf("%d%d%s",&p,&r,na);
-  head->prn=p;
-  head->roll=r;
-  strcpy(head->name,na);
-  head->next =NULL;
-  return head;
-}
-void add_member(struct node *head)
-{
-  int a;
-  struct node *temp,*q;
-  q=head;
-  printf("HOW MANY MEMBERS YOU WANT TO ADD?\n");
-  scanf("%d",&a);
-  for(int i=0;i<a;i++)
-  {
-    temp=(struct node *)malloc(sizeof(struct node));
-    printf("ENTER YOU PRN NO, ROLL NO & NAME:\n");
-    scanf("%d %d %s",&temp->prn,&temp->roll,temp->name);
-    q->next=temp;
-    q=temp;
-  }
 
-
-}
-void display(struct node *head)
-{
-  while(head!=NULL)
-  {
-    printf("\nPRN NO:%d\n",head->prn);
-    printf("ROLL NO:%d\n",head->roll);
-    printf("NAME:%s\n",head->name);
-    head=head->next;
-  }
-}
-void delete_president(struct node *head)
-{
-  struct node *q;
-  q=head->next;
-  free(head);
-}
-void add_secratary(struct node * head)
-{
-struct node *s;
-char ja[30];
-s=(struct node *)malloc(sizeof(struct node));
-printf("ENTER YOU PRN NO, ROLL NO & NAME:\n");
-scanf("%d%d",&s->prn,&s->roll);
-scanf("%s",ja);
-strcpy(s->name,ja);
-while(head!=NULL && head->next!=NULL)
-{
-head=head->next;
-}
-head->next=s;
-s->next=NULL;
-
-}
-void delete_secratary(struct node *head)
-{
-  while(head!=NULL&& head->next!=NULL)
-  {
-    head=head->next;
-  }
-  free(head);
-}
-
-void delete_member(struct node *head)
-{ int n;
-  struct node *p;
-
-   printf("ENTER PRN NO TO DELETE:\n");
-   scanf("%d",&n);
-
-  while(head->prn!=n)
-  {
-    p=head;
-    head=head->next;      
-  }
-
-  p->next=head->next;
-  free(head);
-}
-
-
-
-
-int main()
-{   
-  int a;
-    char ch;
+// Add president (head)
+struct node* create() {
     struct node *head;
-  do{
-  printf("\n1)ADD PRESIDENT\n2)ADD MEMBERS\n3)ADD SECRATERY\n4)DELETE PRESIDENT\n5)DELETE SECRATERY\n6)DELETE MEMBERS\n7)DISPLAY\n8)exit\n\n");
-  printf("enter your choice\n");
-  scanf("%d",&a);
-  switch(a)
-  {
-    case 1:
-    head=create();  //HEAD IS PRESIDENT
-    break;
-    case 2:
-    add_member(head);
-    break;
-    case 3:
-    add_secratary(head);
-    break;
-    case 4:
-    delete_president(head);
-    break;
-    case 5:
-    delete_secratary(head);
-    break;
-    case 6:
-    delete_member(head);
-    break;
-    case 7:
-    display(head);
-    break;
+    head = (struct node *)malloc(sizeof(struct node));
+    printf("ENTER PRN NO, ROLL NO & NAME of PRESIDENT:\n");
+    scanf("%d %d %s", &head->prn, &head->roll, head->name);
+    head->next = NULL;
+    return head;
+}
 
-  }
+// Add members after president
+void add_member(struct node *head) {
+    int count;
+    struct node *temp, *q = head;
 
-  }while(a!=8);
+    printf("HOW MANY MEMBERS YOU WANT TO ADD?\n");
+    scanf("%d", &count);
 
+    // Move to last member or president
+    while (q->next != NULL) {
+        q = q->next;
+    }
+
+    for (int i = 0; i < count; i++) {
+        temp = (struct node *)malloc(sizeof(struct node));
+        printf("ENTER PRN NO, ROLL NO & NAME of MEMBER %d:\n", i + 1);
+        scanf("%d %d %s", &temp->prn, &temp->roll, temp->name);
+        temp->next = NULL;
+        q->next = temp;
+        q = temp;
+    }
+}
+
+// Add secretary at end
+void add_secratary(struct node *head) {
+    struct node *s = (struct node *)malloc(sizeof(struct node));
+    printf("ENTER PRN NO, ROLL NO & NAME of SECRETARY:\n");
+    scanf("%d %d %s", &s->prn, &s->roll, s->name);
+    s->next = NULL;
+
+    while (head->next != NULL) {
+        head = head->next;
+    }
+    head->next = s;
+}
+
+// Delete president and return new head
+struct node* delete_president(struct node *head) {
+    if (head == NULL) return NULL;
+
+    struct node *temp = head;
+    head = head->next;
+    free(temp);
+    printf("President deleted.\n");
+    return head;
+}
+
+// Delete secretary (last node)
+void delete_secratary(struct node *head) {
+    if (head == NULL || head->next == NULL) {
+        printf("Cannot delete secretary. List is empty or only president exists.\n");
+        return;
+    }
+
+    struct node *prev = NULL;
+
+    while (head->next != NULL) {
+        prev = head;
+        head = head->next;
+    }
+
+    free(head);
+    prev->next = NULL;
+    printf("Secretary deleted.\n");
+}
+
+// Delete member by PRN
+void delete_member(struct node *head) {
+    if (head == NULL || head->next == NULL) {
+        printf("No members to delete.\n");
+        return;
+    }
+
+    int target;
+    printf("ENTER PRN NO OF MEMBER TO DELETE:\n");
+    scanf("%d", &target);
+
+    struct node *prev = head;
+    struct node *curr = head->next;
+
+    while (curr != NULL) {
+        if (curr->prn == target) {
+            prev->next = curr->next;
+            free(curr);
+            printf("Member with PRN %d deleted.\n", target);
+            return;
+        }
+        prev = curr;
+        curr = curr->next;
+    }
+
+    printf("Member with PRN %d not found.\n", target);
+}
+
+// Display club
+void display(struct node *head) {
+    if (head == NULL) {
+        printf("\nClub is empty.\n");
+        return;
+    }
+
+    printf("\n---- CLUB MEMBERS ----\n");
+    struct node *temp = head;
+    int count = 1;
+
+    while (temp != NULL) {
+        printf("\nMember %d:\n", count++);
+        printf("ROLE    : ");
+        if (temp == head)
+            printf("President\n");
+        else if (temp->next == NULL)
+            printf("Secretary\n");
+        else
+            printf("Member\n");
+
+        printf("PRN NO  : %d\n", temp->prn);
+        printf("ROLL NO : %d\n", temp->roll);
+        printf("NAME    : %s\n", temp->name);
+
+        temp = temp->next;
+    }
+    printf("-----------------------\n");
+}
+
+int main() {
+    int choice;
+    struct node *head = NULL;
+
+    do {
+        printf("\n1) ADD PRESIDENT\n2) ADD MEMBERS\n3) ADD SECRETARY\n");
+        printf("4) DELETE PRESIDENT\n5) DELETE SECRETARY\n6) DELETE MEMBER\n");
+        printf("7) DISPLAY CLUB\n8) EXIT\n\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                head = create();  // HEAD IS PRESIDENT
+                break;
+            case 2:
+                if (head == NULL)
+                    printf("Please add president first.\n");
+                else
+                    add_member(head);
+                break;
+            case 3:
+                if (head == NULL)
+                    printf("Please add president first.\n");
+                else
+                    add_secratary(head);
+                break;
+            case 4:
+                head = delete_president(head);
+                break;
+            case 5:
+                delete_secratary(head);
+                break;
+            case 6:
+                delete_member(head);
+                break;
+            case 7:
+                display(head);
+                break;
+            case 8:
+                printf("Exiting...\n");
+                break;
+            default:
+                printf("Invalid choice.\n");
+        }
+
+    } while (choice != 8);
+
+    return 0;
 }
